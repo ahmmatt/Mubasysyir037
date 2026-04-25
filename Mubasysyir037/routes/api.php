@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Route Terbuka (Tidak perlu login)
+Route::post('login', [AuthController::class, 'login']);
+
+// Route Tertutup (Harus Login / Autentikasi)
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Semua user yang login (admin & user biasa) bisa melihat, menambah, dan mengubah data
+    Route::get('products', [ProductController::class, 'index']);
+    Route::post('products', [ProductController::class, 'store']);
+    Route::put('products/{id}', [ProductController::class, 'update']);
+    
+    // OTORISASI: Hanya user dengan role 'admin' yang bisa menghapus data
+    Route::delete('products/{id}', [ProductController::class, 'destroy'])->middleware('role:admin');
+    
 });
